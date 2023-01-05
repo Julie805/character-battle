@@ -4,10 +4,12 @@ function getDiceRollArray(diceCount) {
     });   
 }
 
-function getDicePlaceholderHtml(diceCount){
-    return new Array(diceCount).fill(0).map(function(){
+function getDicePlaceholderHtml(diceCount) {
+    return new Array(diceCount).fill(0).map(function () {
         return `<div class="placeholder-dice"></div>`
-    }).join('')
+    }).join("")
 }
 
-export {getDiceRollArray, getDicePlaceholderHtml}
+const getPercentage = (remainingHealth, maximumHealth) => (100 * remainingHealth) / maximumHealth;
+
+export {getDiceRollArray, getDicePlaceholderHtml, getPercentage}
