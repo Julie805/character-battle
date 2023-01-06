@@ -1,62 +1,78 @@
 import characterData from './data.js'
 import Character from './Character.js'
 
-/*
-Challenge
-1. Make it so getNewMonster returns a new instance of Character. Think
-what argument you should be passing. If there are no more monsters in the 
-array, getNewMonster should return an empty object {}.
-2. Down near the bottom of the file, set a new variable "monster" equal 
-to our new function getNewMonster.
-3. Delete any code we no longer need.
-- The app will still be broken - don't worry for now!
-**hint.md for help!!**
-*/
-
 let monstersArray = ["orc", "demon", "goblin"]
+let isWaiting = false
 
 function getNewMonster() {
     const nextMonsterData = characterData[monstersArray.shift()]
-    return nextMonsterData
-
+    return nextMonsterData ? new Character(nextMonsterData) : {}
 }
 
+/*
+Challenge
+1. Disable the user's ability to attack when a monster dies.
+2. Reneable the user's ability to attack when a new monster
+loads.
+3. When the game is over, disable the user's ability to attack.
+**hint.md for help!!**
+*/
+
+
 function attack() {
-    wizard.getDiceHtml()
-    orc.getDiceHtml()
-    wizard.takeDamage(orc.currentDiceScore)
-    orc.takeDamage(wizard.currentDiceScore)
-    render()
-    
-        if(wizard.dead || orc.dead){
+    if(!isWaiting){
+        wizard.getDiceHtml()
+        monster.getDiceHtml()
+        wizard.takeDamage(monster.currentDiceScore)
+        monster.takeDamage(wizard.currentDiceScore)
+        render()
+        
+        if(wizard.dead){
             endGame()
-        }      
+        }
+        else if(monster.dead){
+            isWaiting = true
+            if(monstersArray.length > 0){
+                setTimeout(()=>{
+                    monster = getNewMonster()
+                    render()
+                    isWaiting = false
+                },1500)
+            }
+            else{
+                endGame()
+            }
+        }    
+    }
+
 }
 
 function endGame() {
-    const endMessage = wizard.health === 0 && orc.health === 0 ?
+    isWaiting = true
+    const endMessage = wizard.health === 0 && monster.health === 0 ?
         "No victors - all creatures are dead" :
         wizard.health > 0 ? "The Wizard Wins" :
-            "The Orc is Victorious"
+            "The monsters are Victorious"
 
     const endEmoji = wizard.health > 0 ? "🔮" : "☠️"
-    document.body.innerHTML = `
-        <div class="end-game">
-            <h2>Game Over</h2> 
-            <h3>${endMessage}</h3>
-            <p class="end-emoji">${endEmoji}</p>
-        </div>
-        `
+        setTimeout(()=>{
+            document.body.innerHTML = `
+                <div class="end-game">
+                    <h2>Game Over</h2> 
+                    <h3>${endMessage}</h3>
+                    <p class="end-emoji">${endEmoji}</p>
+                </div>
+                `
+        }, 1500)
 }
 
 document.getElementById("attack-button").addEventListener('click', attack)
 
 function render() {
     document.getElementById('hero').innerHTML = wizard.getCharacterHtml()
-    document.getElementById('monster').innerHTML = orc.getCharacterHtml()
+    document.getElementById('monster').innerHTML = monster.getCharacterHtml()
 }
 
 const wizard = new Character(characterData.hero)
-const orc = new Character(characterData.monster)
-
+let monster = getNewMonster()
 render()
